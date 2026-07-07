@@ -1,4 +1,4 @@
-export const siteUrl = "https://ryanlee-portfolio.vercel.app";
+export const siteUrl = "https://ryanyichenlee.vercel.app";
 
 export const site = {
   name: "Ryan Lee",

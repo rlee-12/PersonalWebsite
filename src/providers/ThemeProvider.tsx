@@ -7,6 +7,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import ThemeWash from "@/components/layout/ThemeWash";
 
 type Theme = "light" | "dark";
 
@@ -31,22 +32,52 @@ function applyTheme(theme: Theme) {
   document.documentElement.classList.toggle("dark", theme === "dark");
 }
 
+function prefersReducedMotion() {
+  return (
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(readThemeFromDom);
+  const [washTarget, setWashTarget] = useState<Theme | null>(null);
+
+  const completeWash = useCallback(() => {
+    if (!washTarget) return;
+    localStorage.setItem(STORAGE_KEY, washTarget);
+    applyTheme(washTarget);
+    setTheme(washTarget);
+    setWashTarget(null);
+  }, [washTarget]);
 
   const toggleTheme = useCallback(() => {
-    setTheme((prev) => {
-      const next = prev === "dark" ? "light" : "dark";
+    const next: Theme = theme === "dark" ? "light" : "dark";
+
+    if (prefersReducedMotion()) {
       localStorage.setItem(STORAGE_KEY, next);
       applyTheme(next);
-      return next;
-    });
-  }, []);
+      setTheme(next);
+      return;
+    }
 
-  const value = useMemo(() => ({ theme, toggleTheme }), [theme, toggleTheme]);
+    setWashTarget(next);
+  }, [theme]);
+
+  const displayTheme = washTarget ?? theme;
+
+  const value = useMemo(
+    () => ({ theme: displayTheme, toggleTheme }),
+    [displayTheme, toggleTheme],
+  );
 
   return (
-    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+    <ThemeContext.Provider value={value}>
+      {children}
+      {washTarget ? (
+        <ThemeWash target={washTarget} onComplete={completeWash} />
+      ) : null}
+    </ThemeContext.Provider>
   );
 }
 
