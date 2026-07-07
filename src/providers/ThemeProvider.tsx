@@ -7,7 +7,6 @@ import {
   useMemo,
   useState,
 } from "react";
-import ThemeWash from "@/components/layout/ThemeWash";
 
 type Theme = "light" | "dark";
 
@@ -41,43 +40,32 @@ function prefersReducedMotion() {
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(readThemeFromDom);
-  const [washTarget, setWashTarget] = useState<Theme | null>(null);
-
-  const completeWash = useCallback(() => {
-    if (!washTarget) return;
-    localStorage.setItem(STORAGE_KEY, washTarget);
-    applyTheme(washTarget);
-    setTheme(washTarget);
-    setWashTarget(null);
-  }, [washTarget]);
 
   const toggleTheme = useCallback(() => {
-    const next: Theme = theme === "dark" ? "light" : "dark";
+    const next: Theme = readThemeFromDom() === "dark" ? "light" : "dark";
+    localStorage.setItem(STORAGE_KEY, next);
 
-    if (prefersReducedMotion()) {
-      localStorage.setItem(STORAGE_KEY, next);
+    const apply = () => {
       applyTheme(next);
       setTheme(next);
-      return;
+    };
+
+    // Animate the real page repaint as a top-to-bottom gradient reveal.
+    if (document.startViewTransition && !prefersReducedMotion()) {
+      document.documentElement.classList.add("theme-washing");
+      const transition = document.startViewTransition(apply);
+      transition.finished.finally(() => {
+        document.documentElement.classList.remove("theme-washing");
+      });
+    } else {
+      apply();
     }
+  }, []);
 
-    setWashTarget(next);
-  }, [theme]);
-
-  const displayTheme = washTarget ?? theme;
-
-  const value = useMemo(
-    () => ({ theme: displayTheme, toggleTheme }),
-    [displayTheme, toggleTheme],
-  );
+  const value = useMemo(() => ({ theme, toggleTheme }), [theme, toggleTheme]);
 
   return (
-    <ThemeContext.Provider value={value}>
-      {children}
-      {washTarget ? (
-        <ThemeWash target={washTarget} onComplete={completeWash} />
-      ) : null}
-    </ThemeContext.Provider>
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
 }
 

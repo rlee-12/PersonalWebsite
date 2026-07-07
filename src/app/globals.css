@@ -209,50 +209,36 @@ body {
   outline-offset: 2px;
 }
 
-/* ---- Theme wash (light ↔ dark) ---- */
+/* ---- Theme wash (light ↔ dark) ----
+   Uses the View Transitions API: the newly-themed page is revealed over the
+   old one through a soft gradient mask that sweeps down the screen, so the
+   content itself appears to gradually change rather than being covered. */
 
-@keyframes theme-wash-down {
+@keyframes theme-wash-sweep {
   from {
-    clip-path: inset(0 0 100% 0);
+    mask-position: 0% 100%;
   }
   to {
-    clip-path: inset(0 0 0 0);
+    mask-position: 0% 0%;
   }
 }
 
-.theme-wash {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  pointer-events: none;
-  background: var(--wash-color);
-  animation: theme-wash-down 0.75s cubic-bezier(0.33, 1, 0.68, 1) forwards;
-  will-change: clip-path;
+.theme-washing::view-transition-old(root) {
+  animation: none;
 }
 
-.theme-wash--light::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
+.theme-washing::view-transition-new(root) {
+  /* Mask is 3x viewport height: solid top third, soft fade middle third,
+     transparent bottom third. Sliding it up reveals top-to-bottom. */
+  mask-image: linear-gradient(
     to bottom,
-    rgba(255, 255, 255, 0.12) 0%,
-    transparent 35%,
-    transparent 100%
+    black 0%,
+    black 33.4%,
+    transparent 66.6%
   );
-  mix-blend-mode: soft-light;
-}
-
-.theme-wash--dark::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.2) 0%,
-    transparent 40%,
-    transparent 100%
-  );
+  mask-size: 100% 300%;
+  mask-repeat: no-repeat;
+  animation: theme-wash-sweep 1s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
