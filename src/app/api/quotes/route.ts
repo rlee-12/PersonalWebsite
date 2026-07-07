@@ -9,6 +9,7 @@ export type Quote = {
   label: string;
   price: number;
   changePct: number;
+  spark: number[];
 };
 
 async function fetchQuote(
@@ -19,7 +20,7 @@ async function fetchQuote(
     const res = await fetch(
       `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(
         symbol,
-      )}`,
+      )}?range=1d&interval=15m`,
       {
         headers: { "User-Agent": "Mozilla/5.0" },
         cache: "no-store",
@@ -28,15 +29,22 @@ async function fetchQuote(
     if (!res.ok) return null;
 
     const data = await res.json();
-    const meta = data?.chart?.result?.[0]?.meta;
+    const result = data?.chart?.result?.[0];
+    const meta = result?.meta;
     if (!meta) return null;
 
     const price = meta.regularMarketPrice;
     const prev = meta.chartPreviousClose ?? meta.previousClose;
     if (typeof price !== "number" || typeof prev !== "number") return null;
 
+    const closes: (number | null)[] =
+      result?.indicators?.quote?.[0]?.close ?? [];
+    const spark = closes
+      .filter((c): c is number => typeof c === "number")
+      .slice(-28);
+
     const changePct = prev ? ((price - prev) / prev) * 100 : 0;
-    return { symbol, label, price, changePct };
+    return { symbol, label, price, changePct, spark };
   } catch {
     return null;
   }

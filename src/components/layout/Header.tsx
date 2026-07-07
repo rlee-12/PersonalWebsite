@@ -1,23 +1,17 @@
 "use client";
 
-import { Menu, X } from "lucide-react";
+import { ArrowRight, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { nav, site } from "@/data/site";
+import { contact, nav, site } from "@/data/site";
 import { cn } from "@/lib/utils";
 import Container from "./Container";
 import ThemeToggle from "./ThemeToggle";
 
+const email = contact.links.find((l) => l.label === "Email")?.href ?? "#contact";
+
 export default function Header() {
   const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState<string>("");
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     const ids = nav.map((item) => item.href.replace("#", ""));
@@ -59,39 +53,49 @@ export default function Header() {
   }, []);
 
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-50 border-b border-border transition-all duration-200",
-        scrolled ? "bg-bg/85 backdrop-blur-md" : "bg-bg/70 backdrop-blur-sm",
-      )}
-    >
+    <header className="sticky top-0 z-50 border-b border-border bg-bg/90 backdrop-blur-md">
       <Container className="flex h-14 items-center justify-between gap-4">
         <a
           href="#top"
-          className="text-sm font-semibold tracking-tight text-fg transition-colors hover:text-primary"
+          className="flex items-baseline gap-2 transition-opacity hover:opacity-75"
         >
-          {site.name}
+          <span className="font-display text-lg font-bold tracking-tight text-fg">
+            {site.name}
+          </span>
+          <span className="hidden font-mono text-[10px] uppercase tracking-[0.2em] text-muted sm:inline">
+            · Portfolio
+          </span>
         </a>
 
-        <nav
-          className="hidden items-center gap-1 lg:flex"
-          aria-label="Primary"
-        >
-          {nav.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "rounded-md px-3 py-2 text-sm font-medium text-muted transition-colors hover:text-primary",
-                active === item.href &&
-                  "text-primary underline decoration-primary underline-offset-4",
-              )}
-            >
-              {item.label}
-            </a>
-          ))}
-          <ThemeToggle />
-        </nav>
+        <div className="hidden items-center gap-1 lg:flex">
+          <nav className="flex items-center gap-1" aria-label="Primary">
+            {nav.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "px-3 py-2 text-sm font-medium text-muted transition-colors hover:text-fg",
+                  active === item.href && "text-accent",
+                )}
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
+          <div className="mx-2">
+            <ThemeToggle />
+          </div>
+          <a
+            href={email}
+            className="group inline-flex items-center gap-1.5 bg-fg px-4 py-2 text-sm font-medium text-bg transition-opacity hover:opacity-85"
+          >
+            Get in touch
+            <ArrowRight
+              size={13}
+              className="transition-transform group-hover:translate-x-0.5"
+            />
+          </a>
+        </div>
 
         <div className="flex items-center gap-2 lg:hidden">
           <ThemeToggle />
@@ -100,7 +104,7 @@ export default function Header() {
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-surface text-fg"
+            className="inline-flex h-9 w-9 items-center justify-center border border-border bg-surface text-fg"
           >
             {open ? <X size={18} /> : <Menu size={18} />}
           </button>
@@ -108,7 +112,7 @@ export default function Header() {
       </Container>
 
       {open && (
-        <div className="border-t border-border bg-surface lg:hidden">
+        <div className="border-t border-border bg-bg lg:hidden">
           <Container className="py-4">
             <nav className="flex flex-col gap-1" aria-label="Mobile">
               {nav.map((item) => (
@@ -117,13 +121,21 @@ export default function Header() {
                   href={item.href}
                   onClick={() => setOpen(false)}
                   className={cn(
-                    "rounded-md px-3 py-2.5 text-sm font-medium text-muted transition-colors hover:bg-bg hover:text-primary",
-                    active === item.href && "text-primary",
+                    "px-3 py-2.5 text-sm font-medium text-muted transition-colors hover:bg-surface hover:text-fg",
+                    active === item.href && "text-accent",
                   )}
                 >
                   {item.label}
                 </a>
               ))}
+              <a
+                href={email}
+                onClick={() => setOpen(false)}
+                className="mt-2 inline-flex items-center justify-center gap-1.5 bg-fg px-4 py-2.5 text-sm font-medium text-bg"
+              >
+                Get in touch
+                <ArrowRight size={13} />
+              </a>
             </nav>
           </Container>
         </div>

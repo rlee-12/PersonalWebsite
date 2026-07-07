@@ -12,17 +12,18 @@ export default function SectionHeader({
   index,
 }: SectionHeaderProps) {
   return (
-    <div className="mb-8 sm:mb-10">
-      <p className="flex items-center gap-2 font-mono text-xs font-medium uppercase tracking-widest text-primary">
-        {index && <span className="text-accent">{index}</span>}
-        <span aria-hidden="true" className="h-px w-6 bg-primary/50" />
-        {eyebrow}
-      </p>
-      <h2 className="mt-2 text-2xl font-bold tracking-tight text-fg sm:text-3xl">
+    <div className="mb-10 sm:mb-12">
+      <div className="rule flex items-baseline justify-between gap-4 pt-3">
+        <p className="font-mono text-[11px] font-medium uppercase tracking-[0.22em] text-accent">
+          {index && <span className="mr-2 text-muted">No. {index}</span>}
+          {eyebrow}
+        </p>
+      </div>
+      <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-fg sm:text-[2.6rem] sm:leading-tight">
         {title}
       </h2>
       {description && (
-        <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted">
+        <p className="mt-3 max-w-2xl font-display text-lg italic leading-relaxed text-muted">
           {description}
         </p>
       )}

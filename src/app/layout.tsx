@@ -1,16 +1,21 @@
 import type { Metadata, Viewport } from "next";
-import { EB_Garamond, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Newsreader } from "next/font/google";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { site, siteUrl } from "@/data/site";
 import "./globals.css";
 
-const garamond = EB_Garamond({
-  variable: "--font-garamond",
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700"],
   style: ["normal", "italic"],
+});
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
@@ -55,8 +60,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f4f7fc" },
-    { media: "(prefers-color-scheme: dark)", color: "#050a14" },
+    { media: "(prefers-color-scheme: light)", color: "#f7f5f0" },
+    { media: "(prefers-color-scheme: dark)", color: "#070a12" },
   ],
 };
 
@@ -64,9 +69,7 @@ const themeScript = `
 (function () {
   try {
     var stored = localStorage.getItem('theme');
-    var dark = stored
-      ? stored === 'dark'
-      : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var dark = stored ? stored === 'dark' : false;
     document.documentElement.classList.toggle('dark', dark);
   } catch (e) {}
 })();
@@ -80,7 +83,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${garamond.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${newsreader.variable} ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
